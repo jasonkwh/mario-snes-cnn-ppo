@@ -22,7 +22,7 @@ htmlcov/
 
 # Training artifacts
 mario_checkpoints/
+mario_best_model/
 mario_videos/
-monitor.csv
-monitor_*.csv
+mario_logs/
 *.zip

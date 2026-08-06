@@ -9,4 +9,4 @@ train:
 	python train.py
 
 clean:
-	rm -rf mario_checkpoints/ mario_videos/ monitor.csv
+	rm -rf mario_checkpoints/ mario_best_model/ mario_videos/ mario_logs/

@@ -6,8 +6,10 @@ RECORD_VIDEO_EVERY = 100
 CHECKPOINT_DIR = "./mario_checkpoints/"
 BEST_MODEL_SAVE_DIR = "./mario_best_model/"
 VIDEO_DIR = "./mario_videos/"
-MONITOR_FILENAME = "./monitor.csv"
-MONITOR_EVALUATION_FILENAME = "./monitor_evaluation.csv"
+LOG_DIR = "./mario_logs/"
+TENSORBOARD_LOG_DIR = f"{LOG_DIR}tensorboard/"
+MONITOR_FILENAME = f"{LOG_DIR}monitor.csv"
+MONITOR_EVALUATION_FILENAME = f"{LOG_DIR}monitor_evaluation.csv"
 
 # Training parameters
 FRAME_SKIP = 4 # Repeat each action for 4 frames to reduce decisions and speed up training
@@ -21,4 +23,3 @@ TOTAL_TIMESTEPS = 1_000_000
 EVAL_FREQ = 40_960 # Evaluate every 20 rollout lengths with one training environment
 N_EVAL_EPISODES = 5 # Number of episodes to run during each evaluation
 CHECKPOINT_EVERY = 50_000 # Save a checkpoint every 50,000 training timesteps
-

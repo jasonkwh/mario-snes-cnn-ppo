@@ -8,10 +8,10 @@ from cleanup import close_env
 from environment import make_env
 
 from config import (
-    GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR,
-    CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, 
-    LEARNING_RATE, N_STEPS, BATCH_SIZE, ENT_COEF, FRAME_STACK,
-    TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, CHECKPOINT_EVERY,
+    GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
+    CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
+    BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, 
+    CHECKPOINT_EVERY,
 )
 
 def main():
@@ -54,6 +54,7 @@ def main():
             n_steps=N_STEPS,
             batch_size=BATCH_SIZE,
             ent_coef=ENT_COEF,
+            tensorboard_log=TENSORBOARD_LOG_DIR,
         )
 
         print(f"Training {GAME_NAME} Agent on {device.upper()}...")

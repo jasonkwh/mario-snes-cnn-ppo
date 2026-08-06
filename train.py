@@ -8,8 +8,8 @@ from cleanup import close_env
 from environment import make_env
 
 from config import (
-    GAME_NAME, STATE_NAME, MODEL_NAME, RECORD_VIDEO,
-    CHECKPOINT_DIR, VIDEO_DIR, MONITOR_FILENAME,
+    GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR,
+    CHECKPOINT_DIR, MONITOR_FILENAME,
 )
 
 def main():
@@ -25,7 +25,7 @@ def main():
 
         print(result.stdout)
 
-        env = DummyVecEnv([lambda: make_env(GAME_NAME, STATE_NAME, RECORD_VIDEO, VIDEO_DIR, MONITOR_FILENAME)])
+        env = DummyVecEnv([lambda: make_env(GAME_NAME, STATE_NAME, VIDEO_DIR, MONITOR_FILENAME)])
         env = VecFrameStack(env, n_stack=4, channels_order="last")
         env = VecTransposeImage(env)
 

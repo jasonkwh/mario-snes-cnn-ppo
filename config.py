@@ -4,5 +4,21 @@ MODEL_NAME = "mario_ppo"
 RECORD_VIDEO = True
 RECORD_VIDEO_EVERY = 100
 CHECKPOINT_DIR = "./mario_checkpoints/"
+BEST_MODEL_SAVE_DIR = "./mario_best_model/"
 VIDEO_DIR = "./mario_videos/"
 MONITOR_FILENAME = "./monitor.csv"
+MONITOR_EVALUATION_FILENAME = "./monitor_evaluation.csv"
+
+# Training parameters
+FRAME_SKIP = 4 # Repeat each action for 4 frames to reduce decisions and speed up training
+OBSERVATION_SHAPE = (84, 96) # Resize observations to height x width for the CNN input
+LEARNING_RATE = 0.00025 # Learning rate for the optimizer
+N_STEPS = 2_048 # Number of steps to run for each environment per update (per policy rollout)
+BATCH_SIZE = 64
+ENT_COEF = 0.01 # Entropy coefficient for the loss calculation
+FRAME_STACK = 4 # Number of frames to stack
+TOTAL_TIMESTEPS = 1_000_000
+EVAL_FREQ = 40_960 # Evaluate every 20 rollout lengths with one training environment
+N_EVAL_EPISODES = 5 # Number of episodes to run during each evaluation
+CHECKPOINT_EVERY = 50_000 # Save a checkpoint every 50,000 training timesteps
+

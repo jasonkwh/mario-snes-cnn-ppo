@@ -5,7 +5,8 @@ from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 from stable_baselines3.common.monitor import Monitor
 
 from config import (
-    RECORD_VIDEO, RECORD_VIDEO_EVERY
+    RECORD_VIDEO, RECORD_VIDEO_EVERY,
+    FRAME_SKIP, OBSERVATION_SHAPE,
 )
 
 def make_env(
@@ -21,8 +22,8 @@ def make_env(
     )
 
     env = RewardWrapper(env)
-    env = MaxAndSkipEnv(env, skip=4)
-    env = gym.wrappers.ResizeObservation(env, shape=(84, 96))
+    env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
+    env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
     env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
 
     # Add RecordVideo as the final wrapper

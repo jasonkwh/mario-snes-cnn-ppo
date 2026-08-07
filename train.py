@@ -43,8 +43,8 @@ def main():
             lambda: make_env(
                 GAME_NAME,
                 STATE_NAME,
-                video_folder=f"{VIDEO_DIR}/evaluation",
-                monitor_filename=MONITOR_EVALUATION_FILENAME,
+                VIDEO_DIR,
+                MONITOR_EVALUATION_FILENAME,
                 is_evaluation=True,
             )
         ], start_method="spawn")

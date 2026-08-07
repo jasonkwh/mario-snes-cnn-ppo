@@ -6,7 +6,7 @@ from stable_baselines3.common.monitor import Monitor
 
 from config import (
     RECORD_VIDEO, RECORD_VIDEO_EVERY,
-    FRAME_SKIP, OBSERVATION_SHAPE,
+    FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
 )
 
 def make_env(
@@ -26,8 +26,9 @@ def make_env(
     env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
     env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
 
-    # Add RecordVideo as the final wrapper
     if RECORD_VIDEO:
+        env.metadata["render_fps"] = VIDEO_RENDER_FPS
+
         env = gym.wrappers.RecordVideo(
             env,
             video_folder=video_folder,

@@ -3,6 +3,7 @@ STATE_NAME = "YoshiIsland1"
 MODEL_NAME = "mario_ppo"
 RECORD_VIDEO = True
 RECORD_VIDEO_EVERY = 100
+VIDEO_RENDER_FPS = 60
 CHECKPOINT_DIR = "./mario_checkpoints/"
 BEST_MODEL_SAVE_DIR = "./mario_best_model/"
 VIDEO_DIR = "./mario_videos/"

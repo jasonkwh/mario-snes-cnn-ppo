@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import gymnasium as gym
 import stable_retro
 from reward import RewardWrapper
@@ -33,6 +35,7 @@ def make_env(
             video_folder=video_folder,
             episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
             fps=VIDEO_RENDER_FPS,
+            name_prefix=f"evaluation-{uuid4().hex}",
         )
 
     env = Monitor(env, filename=monitor_filename)

@@ -28,7 +28,14 @@ def main():
 
         print(result.stdout)
 
-        env = DummyVecEnv([lambda: make_env(GAME_NAME, STATE_NAME, VIDEO_DIR, MONITOR_FILENAME)])
+        env = DummyVecEnv([
+            lambda: make_env(
+                GAME_NAME,
+                STATE_NAME,
+                VIDEO_DIR,
+                MONITOR_FILENAME,
+            )
+        ])
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
 
@@ -38,6 +45,7 @@ def main():
                 STATE_NAME,
                 video_folder=f"{VIDEO_DIR}/evaluation",
                 monitor_filename=MONITOR_EVALUATION_FILENAME,
+                is_evaluation=True,
             )
         ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")

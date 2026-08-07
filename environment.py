@@ -13,7 +13,8 @@ def make_env(
     game_name,
     state_name,
     video_folder="./mario_videos/",
-    monitor_filename="./monitor.csv"):
+    monitor_filename="./monitor.csv",
+    is_evaluation=False):
     env = stable_retro.make(
         game=game_name,
         state=state_name,
@@ -26,7 +27,7 @@ def make_env(
     env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
     env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
 
-    if RECORD_VIDEO:
+    if RECORD_VIDEO and is_evaluation:
         env = gym.wrappers.RecordVideo(
             env,
             video_folder=video_folder,

@@ -27,12 +27,11 @@ def make_env(
     env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
 
     if RECORD_VIDEO:
-        env.metadata["render_fps"] = VIDEO_RENDER_FPS
-
         env = gym.wrappers.RecordVideo(
             env,
             video_folder=video_folder,
-            episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0 # Records every RECORD_VIDEO_EVERYth episode
+            episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
+            fps=VIDEO_RENDER_FPS,
         )
 
     env = Monitor(env, filename=monitor_filename)

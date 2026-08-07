@@ -23,5 +23,5 @@ FRAME_STACK = 4 # Number of frames to stack
 TOTAL_TIMESTEPS = 1_000_000
 EVAL_FREQ = 20_000 # Evaluate every 20,000 training timesteps
 N_EVAL_EPISODES = 5 # Number of episodes to run during each evaluation
-MAX_EVAL_EPISODE_STEPS = 5_000 # Maximum number of steps per evaluation episode
+MAX_EVAL_EPISODE_STEPS = 2_500 # Maximum number of steps per evaluation episode
 CHECKPOINT_EVERY = 50_000 # Save a checkpoint every 50,000 training timesteps

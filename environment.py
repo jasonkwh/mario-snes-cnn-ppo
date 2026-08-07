@@ -9,6 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 from config import (
     RECORD_VIDEO, RECORD_VIDEO_EVERY,
     FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
+    MAX_EVAL_EPISODE_STEPS,
 )
 
 def make_env(
@@ -29,14 +30,20 @@ def make_env(
     env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
     env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
 
-    if RECORD_VIDEO and is_evaluation:
-        env = gym.wrappers.RecordVideo(
+    if is_evaluation:
+        env = gym.wrappers.TimeLimit(
             env,
-            video_folder=video_folder,
-            episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
-            fps=VIDEO_RENDER_FPS,
-            name_prefix=f"evaluation-{uuid4().hex}",
+            max_episode_steps=MAX_EVAL_EPISODE_STEPS,
         )
+
+        if RECORD_VIDEO:
+            env = gym.wrappers.RecordVideo(
+                env,
+                video_folder=video_folder,
+                episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
+                fps=VIDEO_RENDER_FPS,
+                name_prefix=f"evaluation-{uuid4().hex}",
+            )
 
     env = Monitor(env, filename=monitor_filename)
 

@@ -2,7 +2,7 @@ import sys
 import subprocess
 import torch
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack, VecTransposeImage
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from cleanup import close_env
 from environment import make_env
@@ -32,14 +32,14 @@ def main():
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
 
-        eval_env = DummyVecEnv([
+        eval_env = SubprocVecEnv([
             lambda: make_env(
                 GAME_NAME,
                 STATE_NAME,
                 video_folder=f"{VIDEO_DIR}/evaluation",
                 monitor_filename=MONITOR_EVALUATION_FILENAME,
             )
-        ])
+        ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
         eval_env = VecTransposeImage(eval_env)
 

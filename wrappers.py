@@ -1,0 +1,87 @@
+import gymnasium as gym
+import numpy as np
+
+class RewardWrapper(gym.Wrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        self.prev_lives = 0
+        self.coins = 0
+        self.score = 0
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.prev_lives = info.get("lives", 0)
+        self.coins = info.get("coins", 0)
+        self.score = info.get("score", 0)
+        return obs, info
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+
+        current_lives = info.get("lives", self.prev_lives)
+        current_coins = info.get("coins", self.coins)
+        current_score = info.get("score", self.score)
+
+        if self.is_lost_life(current_lives):
+            reward -= 5.0 # Death penalty
+
+        if self.increase_score(current_score):
+            if self.has_collected_coin(current_coins):
+                reward += 0.2 # Coin reward
+            else:
+                reward += 0.05 # Score reward
+
+        self.prev_lives = current_lives
+        self.coins = current_coins
+        self.score = current_score
+
+        return obs, reward, terminated, truncated, info
+
+    def is_lost_life(self, current_lives):
+        return current_lives < self.prev_lives
+
+    def has_collected_coin(self, current_coins):
+        return current_coins > self.coins
+
+    def increase_score(self, current_score):
+        return current_score > self.score
+
+class ActionWrapper(gym.ActionWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        self.combos = [
+            [],                 # do nothing
+            ["LEFT"],
+            ["RIGHT"],
+            ["DOWN"], # crouch
+            ["LEFT", "DOWN"], # left + crouch
+            ["RIGHT", "DOWN"], # right + crouch
+            ["UP"], # up
+            ["A"], # spin jump
+            ["B"], # jump
+            ["RIGHT", "A"], # right + spin jump
+            ["LEFT", "A"], # left + spin jump
+            ["RIGHT", "B"], # right + jump
+            ["LEFT", "B"], # left + jump
+            ["X"], # fire
+            ["A", "X"], # spin jump + fire
+            ["B", "X"], # jump + fire
+            ["RIGHT", "X"],    # run right
+            ["LEFT", "X"],    # run left
+            ["RIGHT", "A", "X"],    # run right + spin jump + fire
+            ["LEFT", "A", "X"],    # run left + spin jump + fire
+            ["RIGHT", "B", "X"],    # run right + jump + fire
+            ["LEFT", "B", "X"],    # run left + jump + fire
+        ]
+        buttons = env.unwrapped.buttons
+        self.actions = []
+
+        for combo in self.combos:
+            action = np.zeros(env.action_space.n, dtype=np.uint8)
+            for button in combo:
+                action[buttons.index(button)] = 1
+            self.actions.append(action)
+        self.action_space = gym.spaces.Discrete(len(self.actions))
+
+    def action(self, action):
+        return self.actions[action].copy()

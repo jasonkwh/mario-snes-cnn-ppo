@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import gymnasium as gym
 import stable_retro
-from reward import RewardWrapper
+from wrappers import ActionWrapper, RewardWrapper
 from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 from stable_baselines3.common.monitor import Monitor
 
@@ -21,10 +21,11 @@ def make_env(
     env = stable_retro.make(
         game=game_name,
         state=state_name,
-        use_restricted_actions=stable_retro.Actions.DISCRETE,
+        use_restricted_actions=stable_retro.Actions.ALL,
         render_mode="rgb_array",
     )
 
+    env = ActionWrapper(env)
     env = RewardWrapper(env)
     env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
     env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)

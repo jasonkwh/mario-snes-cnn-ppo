@@ -5,7 +5,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
-from helpers import get_latest_checkpoint_path
+from helpers import get_latest_checkpoint_path, get_best_model_path
 
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
@@ -57,7 +57,12 @@ def main():
         checkpoint_path = get_latest_checkpoint_path()
 
         if checkpoint_path is not None:
-            model = PPO.load(checkpoint_path, env=env, device=device)
+            model = PPO.load(
+                checkpoint_path,
+                env=env,
+                device=device,
+                tensorboard_log=TENSORBOARD_LOG_DIR,
+            )
             reset_num_timesteps = False
         else:
             model = PPO(
@@ -100,8 +105,18 @@ def main():
             reset_num_timesteps=reset_num_timesteps,
         )
 
-        model.save(MODEL_NAME)
-        print(f"Model saved successfully as '{MODEL_NAME}.zip'")
+        best_model_path = get_best_model_path()
+
+        if best_model_path is not None:
+            best_model = PPO.load(best_model_path, device=device)
+            best_model.save(MODEL_NAME)
+            print(f"Best evaluated model saved as '{MODEL_NAME}.zip'")
+        else:
+            model.save(MODEL_NAME)
+            print(
+                f"No evaluated best model was created; "
+                f"last model saved as '{MODEL_NAME}.zip'"
+            )
     finally:
         if env is not None:
             env.close()

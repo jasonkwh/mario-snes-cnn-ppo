@@ -9,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 from config import (
     RECORD_VIDEO, RECORD_VIDEO_EVERY,
     FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
-    MAX_EVAL_EPISODE_STEPS,
+    MAX_EPISODE_STEPS,
 )
 
 class MarioEnvironment(gym.Wrapper):
@@ -33,13 +33,12 @@ class MarioEnvironment(gym.Wrapper):
         env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
         env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
         env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
+        env = gym.wrappers.TimeLimit(
+            env,
+            max_episode_steps=MAX_EPISODE_STEPS,
+        )
 
         if is_evaluation:
-            env = gym.wrappers.TimeLimit(
-                env,
-                max_episode_steps=MAX_EVAL_EPISODE_STEPS,
-            )
-
             if RECORD_VIDEO:
                 env = gym.wrappers.RecordVideo(
                     env,

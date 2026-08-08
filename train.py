@@ -5,6 +5,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
+from helpers import get_latest_checkpoint_path
 
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
@@ -52,17 +53,25 @@ def main():
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        model = PPO(
-            policy="CnnPolicy",
-            env=env,
-            device=device,
-            verbose=1,
-            learning_rate=LEARNING_RATE,
-            n_steps=N_STEPS,
-            batch_size=BATCH_SIZE,
-            ent_coef=ENT_COEF,
-            tensorboard_log=TENSORBOARD_LOG_DIR,
-        )
+        # load latest checkpoint if it exists
+        checkpoint_path = get_latest_checkpoint_path()
+
+        if checkpoint_path is not None:
+            model = PPO.load(checkpoint_path, env=env, device=device)
+            reset_num_timesteps = False
+        else:
+            model = PPO(
+                policy="CnnPolicy",
+                env=env,
+                device=device,
+                verbose=1,
+                learning_rate=LEARNING_RATE,
+                n_steps=N_STEPS,
+                batch_size=BATCH_SIZE,
+                ent_coef=ENT_COEF,
+                tensorboard_log=TENSORBOARD_LOG_DIR,
+            )
+            reset_num_timesteps = True
 
         print(f"Training {GAME_NAME} Agent on {device.upper()}...")
 
@@ -88,6 +97,7 @@ def main():
         model.learn(
             total_timesteps=TOTAL_TIMESTEPS,
             callback=callbacks,
+            reset_num_timesteps=reset_num_timesteps,
         )
 
         model.save(MODEL_NAME)

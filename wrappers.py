@@ -63,28 +63,30 @@ class ActionWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super().__init__(env)
         self.combos = [
-            [],                 # do nothing
+            [], # do nothing
+            ["B"], # jump
+            ["A"], # spin jump
+            ["UP", "B"], # jumping out of water
+            ["UP", "A"], # spin jump out of water / Yoshi dismount
+            ["DOWN"], # crouching
+            ["RIGHT", "B"], # swimming right
+            ["LEFT", "B"], # swimming left
+            ["UP", "Y"],
+            ["DOWN", "Y"],
             ["LEFT"],
             ["RIGHT"],
-            ["DOWN"], # crouch
             ["LEFT", "DOWN"], # left + crouch
             ["RIGHT", "DOWN"], # right + crouch
             ["UP"], # up
-            ["A"], # spin jump
-            ["B"], # jump
-            ["RIGHT", "A"], # right + spin jump
-            ["LEFT", "A"], # left + spin jump
-            ["RIGHT", "B"], # right + jump
-            ["LEFT", "B"], # left + jump
-            ["X"], # fire
-            ["A", "X"], # spin jump + fire
-            ["B", "X"], # jump + fire
-            ["RIGHT", "X"],    # run right
-            ["LEFT", "X"],    # run left
-            ["RIGHT", "A", "X"],    # run right + spin jump + fire
-            ["LEFT", "A", "X"],    # run left + spin jump + fire
-            ["RIGHT", "B", "X"],    # run right + jump + fire
-            ["LEFT", "B", "X"],    # run left + jump + fire
+            ["Y"], # fire
+            ["Y", "A"], # spin jump + fire
+            ["Y", "B"], # jump + fire
+            ["RIGHT", "Y"],    # run right
+            ["LEFT", "Y"],    # run left
+            ["RIGHT", "Y", "A"],    # run right + spin jump + fire
+            ["RIGHT", "Y", "B"],    # run right + jump + fire
+            ["LEFT", "Y", "A"],    # run left + spin jump + fire
+            ["LEFT", "Y", "B"],    # run left + jump + fire
         ]
         buttons = env.unwrapped.buttons
         self.actions = []

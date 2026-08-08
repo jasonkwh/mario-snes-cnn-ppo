@@ -4,8 +4,7 @@ import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
-from cleanup import close_env
-from environment import make_env
+from environment import MarioEnvironment
 
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
@@ -29,7 +28,7 @@ def main():
         print(result.stdout)
 
         env = DummyVecEnv([
-            lambda: make_env(
+            lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
                 VIDEO_DIR,
@@ -40,7 +39,7 @@ def main():
         env = VecTransposeImage(env)
 
         eval_env = SubprocVecEnv([
-            lambda: make_env(
+            lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
                 VIDEO_DIR,
@@ -95,9 +94,9 @@ def main():
         print(f"Model saved successfully as '{MODEL_NAME}.zip'")
     finally:
         if env is not None:
-            close_env(env)
+            env.close()
         if eval_env is not None:
-            close_env(eval_env)
+            eval_env.close()
 
 if __name__ == "__main__":
     main()

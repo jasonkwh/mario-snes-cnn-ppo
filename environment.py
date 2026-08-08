@@ -12,40 +12,41 @@ from config import (
     MAX_EVAL_EPISODE_STEPS,
 )
 
-def make_env(
-    game_name,
-    state_name,
-    video_folder="./mario_videos/",
-    monitor_filename="./monitor.csv",
-    is_evaluation=False):
-    env = stable_retro.make(
-        game=game_name,
-        state=state_name,
-        use_restricted_actions=stable_retro.Actions.ALL,
-        render_mode="rgb_array",
-    )
-
-    env = ActionWrapper(env)
-    env = RewardWrapper(env)
-    env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
-    env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
-    env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
-
-    if is_evaluation:
-        env = gym.wrappers.TimeLimit(
-            env,
-            max_episode_steps=MAX_EVAL_EPISODE_STEPS,
+class MarioEnvironment(gym.Wrapper):
+    def __init__(
+        self,
+        game_name,
+        state_name,
+        video_folder="./mario_videos/",
+        monitor_filename="./monitor.csv",
+        is_evaluation=False,
+    ):
+        env = stable_retro.make(
+            game=game_name,
+            state=state_name,
+            use_restricted_actions=stable_retro.Actions.ALL,
+            render_mode="rgb_array",
         )
 
-        if RECORD_VIDEO:
-            env = gym.wrappers.RecordVideo(
+        env = ActionWrapper(env)
+        env = RewardWrapper(env)
+        env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
+        env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
+        env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
+
+        if is_evaluation:
+            env = gym.wrappers.TimeLimit(
                 env,
-                video_folder=video_folder,
-                episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
-                fps=VIDEO_RENDER_FPS,
-                name_prefix=f"evaluation-{uuid4().hex}",
+                max_episode_steps=MAX_EVAL_EPISODE_STEPS,
             )
 
-    env = Monitor(env, filename=monitor_filename)
+            if RECORD_VIDEO:
+                env = gym.wrappers.RecordVideo(
+                    env,
+                    video_folder=video_folder,
+                    episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
+                    fps=VIDEO_RENDER_FPS,
+                    name_prefix=f"evaluation-{uuid4().hex}",
+                )
 
-    return env
+        super().__init__(Monitor(env, filename=monitor_filename))

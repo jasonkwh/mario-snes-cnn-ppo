@@ -18,6 +18,9 @@ class RewardWrapper(gym.Wrapper):
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
 
+        print(f"reward: {reward}")
+        print(f"info: {info}")
+
         current_lives = info.get("lives", self.prev_lives)
         current_coins = info.get("coins", self.coins)
         current_score = info.get("score", self.score)

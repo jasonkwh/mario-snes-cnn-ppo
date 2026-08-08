@@ -1,9 +1,13 @@
-.PHONY: default install train clean
+.PHONY: default install setup train clean
 
 default: train
 
 install:
 	python -m pip install -r requirements.txt
+	$(MAKE) setup
+
+setup:
+	python setup.py
 
 train:
 	python train.py

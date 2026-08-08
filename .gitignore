@@ -26,3 +26,7 @@ mario_best_model/
 mario_videos/
 mario_logs/
 *.zip
+
+# SNES roms
+*.sfc
+*.smc

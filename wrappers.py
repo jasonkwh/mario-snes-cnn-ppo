@@ -42,8 +42,8 @@ class RewardWrapper(gym.Wrapper):
         self.prev_score = current_score
         self.prev_x = current_x
 
-        print(f"reward: {reward}")
-        print(f"info: {info}")
+        # print(f"reward: {reward}")
+        # print(f"info: {info}")
 
         return obs, reward, terminated, truncated, info
 

@@ -75,8 +75,8 @@ class ActionWrapper(gym.ActionWrapper):
             ["DOWN", "Y"],
             ["LEFT"],
             ["RIGHT"],
-            ["LEFT", "DOWN"], # left + crouch
-            ["RIGHT", "DOWN"], # right + crouch
+            # ["LEFT", "DOWN"], # left + crouch
+            # ["RIGHT", "DOWN"], # right + crouch
             ["UP"], # up
             ["Y"], # fire
             ["Y", "A"], # spin jump + fire

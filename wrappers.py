@@ -29,7 +29,7 @@ class RewardWrapper(gym.Wrapper):
         if self.is_lost_life(current_lives):
             reward -= 5.0 # Death penalty
         else:
-            reward += self.x_changed(current_x) * 0.01 # Progress reward/penalty
+            reward += self.x_changed(current_x) * 0.05 # Progress reward/penalty
 
         if self.increase_score(current_score):
             if self.has_collected_coin(current_coins):

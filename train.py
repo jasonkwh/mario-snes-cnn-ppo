@@ -13,7 +13,7 @@ from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
     CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
     BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, 
-    CHECKPOINT_EVERY,
+    CHECKPOINT_EVERY, SEED,
 )
 
 def main():
@@ -39,6 +39,7 @@ def main():
         ])
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
+        env.seed(SEED)
 
         eval_env = SubprocVecEnv([
             lambda: MarioEnvironment(
@@ -49,6 +50,7 @@ def main():
         ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
         eval_env = VecTransposeImage(eval_env)
+        eval_env.seed(SEED + 10_000) # different seed for evaluation environment
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -74,6 +76,7 @@ def main():
                 batch_size=BATCH_SIZE,
                 ent_coef=ENT_COEF,
                 tensorboard_log=TENSORBOARD_LOG_DIR,
+                seed=SEED,
             )
             reset_num_timesteps = True
 

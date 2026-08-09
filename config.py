@@ -1,3 +1,4 @@
+SEED = 40
 GAME_NAME = "SuperMarioWorld-Snes-v0"
 STATE_NAME = "YoshiIsland1"
 MODEL_NAME = "mario_ppo"

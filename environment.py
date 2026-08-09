@@ -9,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 from config import (
     VIDEO_DIR, RECORD_VIDEO_EVERY,
     FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
-    MAX_EPISODE_STEPS,
+    MAX_EPISODE_STEPS, MODEL_NAME, SEED,
 )
 
 class MarioEnvironment(gym.Wrapper):
@@ -43,7 +43,7 @@ class MarioEnvironment(gym.Wrapper):
                 video_folder=VIDEO_DIR,
                 episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
                 fps=VIDEO_RENDER_FPS,
-                name_prefix=f"model-{uuid4().hex}",
+                name_prefix=f"{MODEL_NAME}-{SEED}-{uuid4().hex[:12]}",
             )
 
         super().__init__(

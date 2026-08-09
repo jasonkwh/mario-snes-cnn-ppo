@@ -5,6 +5,7 @@ from config import (
     FRAME_STACK,
     GAME_NAME,
     STATE_NAME,
+    SEED,
 )
 
 class RecordVideoAtBestModelCallback(BaseCallback):
@@ -24,16 +25,17 @@ class RecordVideoAtBestModelCallback(BaseCallback):
             channels_order="last",
         )
         video_env = VecTransposeImage(video_env)
+        video_env.seed(SEED + 20_000) # different seed for video environment
 
         try:
-            observation = video_env.reset()
+            obs = video_env.reset()
             done = [False]
             while not done[0]:
                 action, _ = self.model.predict(
-                    observation,
+                    obs,
                     deterministic=True,
                 )
-                observation, _, done, _ = video_env.step(action)
+                obs, _, done, _ = video_env.step(action)
         finally:
             video_env.close()
 

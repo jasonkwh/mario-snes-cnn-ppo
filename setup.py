@@ -12,10 +12,18 @@ def setup_game():
 
     data = json.loads(data_path.read_text())
 
-    data["info"]["x"] = {
-        "address": 8257684,
-        "type": "<u2",
-    }
+    data["info"].update({
+        "x": {
+            "address": 8257684,
+            "type": "<u2",
+        },
+        # powerup
+        # valid values: 00 small, 01 big, 02 cape, 03 fire
+        "powerup": {
+            "address": 8257561,
+            "type": "<u1",
+        },
+    })
 
     data_path.write_text(json.dumps(data, indent=2) + "\n")
 

@@ -1,5 +1,5 @@
 from stable_baselines3.common.callbacks import BaseCallback
-from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack, VecTransposeImage
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, VecTransposeImage
 from environment import MarioEnvironment
 from config import (
     FRAME_STACK,
@@ -11,14 +11,14 @@ from config import (
 class RecordVideoAtBestModelCallback(BaseCallback):
     # when the new best is found
     def _on_step(self) -> bool:
-        video_env = DummyVecEnv([
+        video_env = SubprocVecEnv([
             lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
                 monitor_filename=None,
                 record_video=True,
             )
-        ])
+        ], start_method="spawn")
         video_env = VecFrameStack(
             video_env, 
             n_stack=FRAME_STACK, 

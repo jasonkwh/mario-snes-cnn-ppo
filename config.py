@@ -1,7 +1,6 @@
 GAME_NAME = "SuperMarioWorld-Snes-v0"
 STATE_NAME = "YoshiIsland1"
 MODEL_NAME = "mario_ppo"
-RECORD_VIDEO = True
 RECORD_VIDEO_EVERY = 5
 VIDEO_RENDER_FPS = 60
 CHECKPOINT_DIR = "./mario_checkpoints/"

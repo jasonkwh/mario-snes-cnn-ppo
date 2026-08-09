@@ -7,9 +7,10 @@ from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
 from helpers import get_latest_checkpoint_path, get_best_model_path
 from setup import setup_game
+from callbacks import RecordVideoAtBestModelCallback
 
 from config import (
-    GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
+    GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
     CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
     BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, 
     CHECKPOINT_EVERY,
@@ -33,7 +34,6 @@ def main():
             lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
-                VIDEO_DIR,
                 MONITOR_FILENAME,
             )
         ])
@@ -44,9 +44,7 @@ def main():
             lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
-                VIDEO_DIR,
                 MONITOR_EVALUATION_FILENAME,
-                is_evaluation=True,
             )
         ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
@@ -97,6 +95,7 @@ def main():
                 deterministic=True,
                 verbose=2,
                 render=False,
+                callback_on_new_best=RecordVideoAtBestModelCallback(),
             ),
         ]
 

@@ -6,6 +6,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFram
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
 from helpers import get_latest_checkpoint_path, get_best_model_path
+from setup import setup_game
 
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, VIDEO_DIR, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
@@ -124,4 +125,5 @@ def main():
             eval_env.close()
 
 if __name__ == "__main__":
+    setup_game()
     main()

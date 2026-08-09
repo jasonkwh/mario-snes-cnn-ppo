@@ -4,17 +4,18 @@ import numpy as np
 class RewardWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
-        self.prev_lives = 0
-        self.prev_coins = 0
-        self.prev_score = 0
-        self.prev_x = 0
+        self.set_previous_state_values()
+        self.has_previous_state = False
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.prev_lives = info.get("lives", 0)
-        self.prev_coins = info.get("coins", 0)
-        self.prev_score = info.get("score", 0)
-        self.prev_x = info.get("x", 0)
+        self.set_previous_state_values(
+            info.get("lives", 0),
+            info.get("coins", 0),
+            info.get("score", 0),
+            info.get("x", 0),
+        )
+        self.has_previous_state = "x" in info
 
         return obs, info
 
@@ -25,6 +26,16 @@ class RewardWrapper(gym.Wrapper):
         current_coins = info.get("coins", self.prev_coins)
         current_score = info.get("score", self.prev_score)
         current_x = info.get("x", self.prev_x)  
+
+        if not self.has_previous_state:
+            self.set_previous_state_values(
+                current_lives, 
+                current_coins, 
+                current_score, 
+                current_x,
+            )
+            self.has_previous_state = True
+            return obs, 0.0, terminated, truncated, info
 
         if self.is_lost_life(current_lives):
             reward -= 5.0 # Death penalty
@@ -37,14 +48,16 @@ class RewardWrapper(gym.Wrapper):
             else:
                 reward += 0.05 # Score reward
 
-        self.prev_lives = current_lives
-        self.prev_coins = current_coins
-        self.prev_score = current_score
-        self.prev_x = current_x
+        self.set_previous_state_values(
+            current_lives, 
+            current_coins, 
+            current_score, 
+            current_x,
+        )
 
-        print(f"reward: {reward}")
-        print(f"info: {info}")
-        print(f"obs: {obs}")
+        # print(f"reward: {reward}")
+        # print(f"info: {info}")
+        # print(f"obs: {obs}")
 
         return obs, reward, terminated, truncated, info
 
@@ -59,6 +72,12 @@ class RewardWrapper(gym.Wrapper):
 
     def x_changed(self, current_x):
         return current_x - self.prev_x
+
+    def set_previous_state_values(self, lives=0, coins=0, score=0, x=0):
+        self.prev_lives = lives
+        self.prev_coins = coins
+        self.prev_score = score
+        self.prev_x = x
 
 class ActionWrapper(gym.ActionWrapper):
     def __init__(self, env):

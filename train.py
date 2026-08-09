@@ -102,11 +102,15 @@ def main():
             ),
         ]
 
-        model.learn(
-            total_timesteps=TOTAL_TIMESTEPS,
-            callback=callbacks,
-            reset_num_timesteps=reset_num_timesteps,
-        )
+        if model.num_timesteps < TOTAL_TIMESTEPS:
+            model.learn(
+                total_timesteps=TOTAL_TIMESTEPS - model.num_timesteps,
+                callback=callbacks,
+                reset_num_timesteps=reset_num_timesteps,
+                progress_bar=True,
+            )
+        else:
+            print(f"Model has already reached {TOTAL_TIMESTEPS} timesteps. Skipping training.")
 
         best_model_path = get_best_model_path()
 

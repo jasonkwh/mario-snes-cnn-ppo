@@ -11,6 +11,7 @@ LOG_DIR = "./mario_logs/"
 TENSORBOARD_LOG_DIR = f"{LOG_DIR}tensorboard/"
 MONITOR_FILENAME = f"{LOG_DIR}monitor.csv"
 MONITOR_EVALUATION_FILENAME = f"{LOG_DIR}monitor_evaluation.csv"
+RESUME_FROM = "latest"  # or "best" or "none"
 
 # Training parameters
 FRAME_SKIP = 4 # Repeat each action for 4 frames to reduce decisions and speed up training

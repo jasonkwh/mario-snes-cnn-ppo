@@ -5,7 +5,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
-from helpers import get_latest_checkpoint_path, get_best_model_path
+from helpers import get_checkpoint_path, get_best_model_path
 from setup import setup_game
 from callbacks import RecordVideoAtBestModelCallback
 
@@ -13,7 +13,7 @@ from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
     CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
     BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, 
-    CHECKPOINT_EVERY, SEED,
+    CHECKPOINT_EVERY, SEED, RESUME_FROM,
 )
 
 def main():
@@ -54,8 +54,8 @@ def main():
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        # load latest checkpoint if it exists
-        checkpoint_path = get_latest_checkpoint_path()
+        # load checkpoint if it exists
+        checkpoint_path = get_checkpoint_path()
 
         if checkpoint_path is not None:
             model = PPO.load(

@@ -1,5 +1,18 @@
 from pathlib import Path
-from config import CHECKPOINT_DIR, MODEL_NAME, BEST_MODEL_SAVE_DIR
+from config import (
+    CHECKPOINT_DIR, MODEL_NAME, BEST_MODEL_SAVE_DIR, RESUME_FROM,
+)
+
+def get_checkpoint_path() -> Path | None:
+    match RESUME_FROM:
+        case "latest":
+            return get_latest_checkpoint_path()
+        case "best":
+            return get_best_model_path()
+        case "none":
+            return None
+        case _:
+            raise ValueError(f"Unknown RESUME_FROM value: {RESUME_FROM}")
 
 def get_latest_checkpoint_path() -> Path | None:
     checkpoints = list(Path(CHECKPOINT_DIR).glob(f"{MODEL_NAME}_*_steps.zip"))

@@ -44,6 +44,7 @@ class RewardWrapper(gym.Wrapper):
 
         print(f"reward: {reward}")
         print(f"info: {info}")
+        print(f"obs: {obs}")
 
         return obs, reward, terminated, truncated, info
 

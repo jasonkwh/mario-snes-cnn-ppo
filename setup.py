@@ -18,9 +18,17 @@ def setup_game():
             "type": "<u2",
         },
         # powerup
-        # valid values: 00 small, 01 big, 02 cape, 03 fire
+        # valid values: 
+        # 00 small, 01 big, 02 cape, 03 fire flower
         "powerup": {
             "address": 8257561,
+            "type": "<u1",
+        },
+        # item box
+        # valid values: 
+        # 00 none, 01 mushroom, 02 fire flower, 03 star, 04 feather
+        "item": {
+            "address": 8261058,
             "type": "<u1",
         },
     })

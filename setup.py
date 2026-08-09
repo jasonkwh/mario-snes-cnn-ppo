@@ -17,6 +17,10 @@ def setup_game():
             "address": 8257684,
             "type": "<u2",
         },
+        "y": {
+            "address": 8257686,
+            "type": "<u2",
+        },
         # powerup
         # valid values: 
         # 00 small, 01 big, 02 cape, 03 fire flower

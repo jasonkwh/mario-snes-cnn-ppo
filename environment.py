@@ -9,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 from config import (
     VIDEO_DIR, RECORD_VIDEO_EVERY,
     FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
-    MAX_EPISODE_STEPS, MODEL_NAME, SEED,
+    MAX_EPISODE_STEPS, MODEL_NAME,
 )
 
 class MarioEnvironment(gym.Wrapper):

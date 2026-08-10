@@ -73,10 +73,6 @@ class RewardWrapper(gym.Wrapper):
             current_timer,
         )
 
-        # print(f"reward: {reward}")
-        # print(f"info: {info}")
-        # print(f"obs: {obs}")
-
         return obs, reward, terminated, truncated, info
 
     def is_lost_life(self, current_lives):

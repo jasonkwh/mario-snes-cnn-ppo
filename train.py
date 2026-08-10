@@ -4,6 +4,7 @@ import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.evaluation import evaluate_policy
 from environment import MarioEnvironment
 from helpers import get_checkpoint_path, get_best_model_path, get_n_envs
 from setup import setup_game
@@ -12,9 +13,29 @@ from callbacks import RecordVideoAtBestModelCallback
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
     CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
-    BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_FREQ, N_EVAL_EPISODES, 
-    CHECKPOINT_EVERY, SEED,
+    BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_EVERY, N_EVAL_EPISODES, 
+    CHECKPOINT_EVERY, SEED, N_EVAL_EPISODES_FINAL,
 )
+
+def final_evaluation(model, eval_env):
+    mean_reward, std_reward = evaluate_policy(
+        model,
+        eval_env,
+        n_eval_episodes=N_EVAL_EPISODES_FINAL,
+        deterministic=True,
+    )
+    print(f"Final evaluation: {mean_reward:.2f} +/- {std_reward:.2f}")
+
+def get_model_to_save(model, device):
+    best_model_path = get_best_model_path()
+
+    if best_model_path is not None:
+        best_model = PPO.load(best_model_path, device=device)
+        print("Using the best model selected during training for final evaluation.")
+        return best_model
+    else:
+        print("No evaluated best model was created. Using the last trained model for final evaluation.")
+        return model
 
 def main():
     env = None
@@ -83,47 +104,40 @@ def main():
 
         print(f"Training {GAME_NAME} Agent on {device.upper()}...")
 
-        callbacks = [
-            CheckpointCallback(
-                save_freq=CHECKPOINT_EVERY,
-                save_path=CHECKPOINT_DIR,
-                name_prefix=MODEL_NAME,
-                verbose=2,
-            ),
-            EvalCallback(
-                eval_env,
-                best_model_save_path=BEST_MODEL_SAVE_DIR,
-                log_path=BEST_MODEL_SAVE_DIR,
-                eval_freq=EVAL_FREQ,
-                n_eval_episodes=N_EVAL_EPISODES,
-                deterministic=True,
-                verbose=2,
-                render=False,
-                callback_on_new_best=RecordVideoAtBestModelCallback(),
-            ),
-        ]
-
         if model.num_timesteps < TOTAL_TIMESTEPS:
             model.learn(
                 total_timesteps=TOTAL_TIMESTEPS - model.num_timesteps,
-                callback=callbacks,
+                callback=[
+                    CheckpointCallback(
+                        save_freq=max(CHECKPOINT_EVERY // get_n_envs(), 1),
+                        save_path=CHECKPOINT_DIR,
+                        name_prefix=MODEL_NAME,
+                        verbose=2,
+                    ),
+                    EvalCallback(
+                        eval_env,
+                        best_model_save_path=BEST_MODEL_SAVE_DIR,
+                        log_path=BEST_MODEL_SAVE_DIR,
+                        eval_freq=max(EVAL_EVERY // get_n_envs(), 1),
+                        n_eval_episodes=N_EVAL_EPISODES,
+                        deterministic=True,
+                        verbose=2,
+                        render=False,
+                        callback_on_new_best=RecordVideoAtBestModelCallback(),
+                    ),
+                ],
                 reset_num_timesteps=reset_num_timesteps,
             )
         else:
             print(f"Model has already reached {TOTAL_TIMESTEPS} timesteps. Skipping training.")
 
-        best_model_path = get_best_model_path()
+        # Evaluate and save the same policy: the best checkpoint when available.
+        final_model = get_model_to_save(model, device)
+        final_evaluation(final_model, eval_env)
 
-        if best_model_path is not None:
-            best_model = PPO.load(best_model_path, device=device)
-            best_model.save(MODEL_NAME)
-            print(f"Best evaluated model saved as '{MODEL_NAME}.zip'")
-        else:
-            model.save(MODEL_NAME)
-            print(
-                f"No evaluated best model was created; "
-                f"last model saved as '{MODEL_NAME}.zip'"
-            )
+        # save the final model
+        final_model.save(MODEL_NAME)
+        print(f"Final evaluated model saved as '{MODEL_NAME}.zip'")
     finally:
         if env is not None:
             env.close()

@@ -59,7 +59,7 @@ def main():
                 seed=SEED + rank,
             )
             for rank in range(get_n_envs())
-        ])
+        ], start_method="spawn")
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
 

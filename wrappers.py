@@ -14,6 +14,7 @@ class RewardWrapper(gym.Wrapper):
             info.get("coins", 0),
             info.get("score", 0),
             info.get("x", 0),
+            info.get("level_end_timer", 0),
         )
         self.has_previous_state = "x" in info
 
@@ -26,6 +27,7 @@ class RewardWrapper(gym.Wrapper):
         current_coins = info.get("coins", self.prev_coins)
         current_score = info.get("score", self.prev_score)
         current_x = info.get("x", self.prev_x)  
+        current_level_end_timer = info.get("level_end_timer", self.prev_level_end_timer)
 
         if not self.has_previous_state:
             self.set_previous_state_values(
@@ -33,6 +35,7 @@ class RewardWrapper(gym.Wrapper):
                 current_coins, 
                 current_score, 
                 current_x,
+                current_level_end_timer,
             )
             self.has_previous_state = True
             return obs, 0.0, terminated, truncated, info
@@ -48,11 +51,16 @@ class RewardWrapper(gym.Wrapper):
             else:
                 reward += 0.05 # Score reward
 
+        if self.level_completed(current_level_end_timer):
+            reward += 100.0 # Level completion reward
+            terminated = True
+
         self.set_previous_state_values(
             current_lives, 
             current_coins, 
             current_score, 
             current_x,
+            current_level_end_timer,
         )
 
         # print(f"reward: {reward}")
@@ -73,11 +81,22 @@ class RewardWrapper(gym.Wrapper):
     def x_changed(self, current_x):
         return current_x - self.prev_x
 
-    def set_previous_state_values(self, lives=0, coins=0, score=0, x=0):
+    def set_previous_state_values(
+        self, 
+        lives=0, 
+        coins=0, 
+        score=0, 
+        x=0,
+        level_end_timer=0,
+    ):
         self.prev_lives = lives
         self.prev_coins = coins
         self.prev_score = score
         self.prev_x = x
+        self.prev_level_end_timer = level_end_timer
+
+    def level_completed(self, current_level_end_timer):
+        return self.prev_level_end_timer==0 and current_level_end_timer>0
 
 class ActionWrapper(gym.ActionWrapper):
     def __init__(self, env):

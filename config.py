@@ -1,4 +1,5 @@
 SEED = 40
+RESERVED_CPU_CORES = 2
 GAME_NAME = "SuperMarioWorld-Snes-v0"
 STATE_NAME = "YoshiIsland1"
 MODEL_NAME = "mario_ppo"

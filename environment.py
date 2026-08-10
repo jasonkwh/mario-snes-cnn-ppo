@@ -19,7 +19,10 @@ class MarioEnvironment(gym.Wrapper):
         state_name,
         monitor_filename=None,
         record_video=False,
+        seed=0,
     ):
+        self._initial_seed = seed
+
         env = stable_retro.make(
             game=game_name,
             state=state_name,
@@ -43,7 +46,7 @@ class MarioEnvironment(gym.Wrapper):
                 video_folder=VIDEO_DIR,
                 episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
                 fps=VIDEO_RENDER_FPS,
-                name_prefix=f"{MODEL_NAME}-{SEED}-{uuid4().hex[:12]}",
+                name_prefix=f"{MODEL_NAME}-{seed}-{uuid4().hex[:12]}",
             )
 
         super().__init__(
@@ -52,3 +55,10 @@ class MarioEnvironment(gym.Wrapper):
                 filename=monitor_filename if monitor_filename else None,
             )
         )
+
+    def reset(self, *, seed=None, options=None):
+        if seed is None:
+            seed = self._initial_seed
+            
+        self._initial_seed = None
+        return super().reset(seed=seed, options=options)

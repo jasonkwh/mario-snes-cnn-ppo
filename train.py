@@ -5,7 +5,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from environment import MarioEnvironment
-from helpers import get_checkpoint_path, get_best_model_path
+from helpers import get_checkpoint_path, get_best_model_path, get_n_envs
 from setup import setup_game
 from callbacks import RecordVideoAtBestModelCallback
 
@@ -30,27 +30,28 @@ def main():
 
         print(result.stdout)
 
-        env = DummyVecEnv([
-            lambda: MarioEnvironment(
+        env = SubprocVecEnv([
+            lambda rank=rank: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
-                MONITOR_FILENAME,
+                monitor_filename=MONITOR_FILENAME.replace(".csv", f"-{rank}.csv"),
+                seed=SEED + rank,
             )
+            for rank in range(get_n_envs())
         ])
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
-        env.seed(SEED)
 
         eval_env = SubprocVecEnv([
             lambda: MarioEnvironment(
                 GAME_NAME,
                 STATE_NAME,
-                MONITOR_EVALUATION_FILENAME,
+                monitor_filename=MONITOR_EVALUATION_FILENAME,
+                seed=SEED + 10_000,
             )
         ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
         eval_env = VecTransposeImage(eval_env)
-        eval_env.seed(SEED + 10_000) # different seed for evaluation environment
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
 

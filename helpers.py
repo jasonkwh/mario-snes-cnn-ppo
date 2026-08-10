@@ -1,7 +1,12 @@
 from pathlib import Path
+import os
 from config import (
-    CHECKPOINT_DIR, MODEL_NAME, BEST_MODEL_SAVE_DIR, RESUME_FROM,
+    CHECKPOINT_DIR, MODEL_NAME, BEST_MODEL_SAVE_DIR, 
+    RESUME_FROM, RESERVED_CPU_CORES,
 )
+
+def get_n_envs() -> int:
+    return max(1, len(os.sched_getaffinity(0)) - RESERVED_CPU_CORES)
 
 def get_checkpoint_path() -> Path | None:
     match RESUME_FROM:

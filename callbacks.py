@@ -17,6 +17,7 @@ class RecordVideoAtBestModelCallback(BaseCallback):
                 STATE_NAME,
                 monitor_filename=None,
                 record_video=True,
+                seed=SEED + 20_000,
             )
         ], start_method="spawn")
         video_env = VecFrameStack(
@@ -25,7 +26,6 @@ class RecordVideoAtBestModelCallback(BaseCallback):
             channels_order="last",
         )
         video_env = VecTransposeImage(video_env)
-        video_env.seed(SEED + 20_000) # different seed for video environment
 
         try:
             obs = video_env.reset()

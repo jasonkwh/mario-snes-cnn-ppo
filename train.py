@@ -108,7 +108,6 @@ def main():
                 total_timesteps=TOTAL_TIMESTEPS - model.num_timesteps,
                 callback=callbacks,
                 reset_num_timesteps=reset_num_timesteps,
-                progress_bar=True,
             )
         else:
             print(f"Model has already reached {TOTAL_TIMESTEPS} timesteps. Skipping training.")

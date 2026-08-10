@@ -8,6 +8,7 @@ from config import (
 def get_n_envs() -> int:
     return max(1, len(os.sched_getaffinity(0)) - RESERVED_CPU_CORES)
 
+
 def get_checkpoint_path() -> Path | None:
     match RESUME_FROM:
         case "latest":

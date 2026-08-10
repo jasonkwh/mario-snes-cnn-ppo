@@ -35,6 +35,29 @@ def setup_game():
             "address": 8261058,
             "type": "<u1",
         },
+        # timer
+        "timer_hundreds": {
+            "address": 8261425,
+            "type": "<u1",
+        },
+        "timer_tens": {
+            "address": 8261426,
+            "type": "<u1",
+        },
+        "timer_ones": {
+            "address": 8261427,
+            "type": "<u1",
+        },
+        # completion
+        "level_end_timer": {
+            "address": 8262803,
+            "type": "<u1",
+        },
+        # star timer
+        "star_timer": {
+            "address": 8262800,
+            "type": "<u1",
+        },
     })
 
     data_path.write_text(json.dumps(data, indent=2) + "\n")

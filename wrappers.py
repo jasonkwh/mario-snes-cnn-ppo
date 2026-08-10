@@ -15,6 +15,7 @@ class RewardWrapper(gym.Wrapper):
             info.get("score", 0),
             info.get("x", 0),
             info.get("level_end_timer", 0),
+            self.get_current_time(info),
         )
         self.has_previous_state = "x" in info
 
@@ -28,6 +29,7 @@ class RewardWrapper(gym.Wrapper):
         current_score = info.get("score", self.prev_score)
         current_x = info.get("x", self.prev_x)  
         current_level_end_timer = info.get("level_end_timer", self.prev_level_end_timer)
+        current_timer = self.get_current_time(info)
 
         if not self.has_previous_state:
             self.set_previous_state_values(
@@ -36,6 +38,7 @@ class RewardWrapper(gym.Wrapper):
                 current_score, 
                 current_x,
                 current_level_end_timer,
+                current_timer,
             )
             self.has_previous_state = True
             return obs, 0.0, terminated, truncated, info
@@ -51,6 +54,12 @@ class RewardWrapper(gym.Wrapper):
             else:
                 reward += 0.05 # Score reward
 
+        if self.times_up(current_timer):
+            reward -= 10.0 # Times up penalty
+            terminated = True
+        elif self.timer_tick(current_timer):
+            reward -= 0.02 # Timer penalty
+
         if self.level_completed(current_level_end_timer):
             reward += 100.0 # Level completion reward
             terminated = True
@@ -61,6 +70,7 @@ class RewardWrapper(gym.Wrapper):
             current_score, 
             current_x,
             current_level_end_timer,
+            current_timer,
         )
 
         # print(f"reward: {reward}")
@@ -81,6 +91,15 @@ class RewardWrapper(gym.Wrapper):
     def x_changed(self, current_x):
         return current_x - self.prev_x
 
+    def get_current_time(self, info):
+        hundreds = info.get("timer_hundreds", 0)
+        tens = info.get("timer_tens", 0)
+        ones = info.get("timer_ones", 0)
+        return hundreds * 100 + tens * 10 + ones
+
+    def timer_tick(self, current_timer):
+        return current_timer < self.prev_timer
+
     def set_previous_state_values(
         self, 
         lives=0, 
@@ -88,12 +107,17 @@ class RewardWrapper(gym.Wrapper):
         score=0, 
         x=0,
         level_end_timer=0,
+        timer=0,
     ):
         self.prev_lives = lives
         self.prev_coins = coins
         self.prev_score = score
         self.prev_x = x
         self.prev_level_end_timer = level_end_timer
+        self.prev_timer = timer
+
+    def times_up(self, current_timer):
+        return self.prev_timer > 0 and current_timer == 0
 
     def level_completed(self, current_level_end_timer):
         return self.prev_level_end_timer==0 and current_level_end_timer>0

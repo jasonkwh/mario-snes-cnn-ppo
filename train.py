@@ -2,19 +2,30 @@ import sys
 import subprocess
 import torch
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecTransposeImage
-from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, VecTransposeImage, VecNormalize
+from stable_baselines3.common.callbacks import CallbackList, CheckpointCallback, EvalCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 from environment import MarioEnvironment
-from helpers import get_checkpoint_path, get_best_model_path, get_n_envs
+from helpers import (
+    get_best_model_path,
+    get_checkpoint_path,
+    get_n_envs,
+    get_vecnormalize_path,
+    linear_schedule,
+    remove_best_model_artifacts,
+)
 from setup import setup_game
-from callbacks import RecordVideoAtBestModelCallback
+from callbacks import (
+    RecordVideoAtBestModelCallback,
+    SaveVecNormalizeAtBestModelCallback,
+)
 
 from config import (
     GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
     CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
     BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_EVERY, N_EVAL_EPISODES, 
-    CHECKPOINT_EVERY, SEED, N_EVAL_EPISODES_FINAL,
+    CHECKPOINT_EVERY, SEED, N_EVAL_EPISODES_FINAL, TARGET_KL, N_EPOCHS, GAMMA, 
+    GAE_LAMBDA, CLIP_RANGE, VF_COEF, MAX_GRAD_NORM, CLIP_REWARD
 )
 
 def final_evaluation(model, eval_env):
@@ -63,6 +74,34 @@ def main():
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
 
+        checkpoint_path = get_checkpoint_path()
+        if checkpoint_path is None:
+            remove_best_model_artifacts()
+        vecnormalize_path = (
+            get_vecnormalize_path(checkpoint_path)
+            if checkpoint_path is not None
+            else None
+        )
+
+        if vecnormalize_path is not None and vecnormalize_path.exists():
+            env = VecNormalize.load(vecnormalize_path, env)
+            env.training = True
+            env.norm_reward = True
+            print(f"Loaded VecNormalize statistics from '{vecnormalize_path}'.")
+        else:
+            if vecnormalize_path is not None:
+                print(
+                    f"VecNormalize statistics not found at '{vecnormalize_path}'. "
+                    "Starting with fresh reward normalization."
+                )
+            env = VecNormalize(
+                env,
+                norm_obs=False,
+                norm_reward=True,
+                clip_reward=CLIP_REWARD,
+                gamma=GAMMA,
+            )
+
         eval_env = SubprocVecEnv([
             lambda: MarioEnvironment(
                 GAME_NAME,
@@ -73,11 +112,15 @@ def main():
         ], start_method="spawn")
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
         eval_env = VecTransposeImage(eval_env)
+        eval_env = VecNormalize(
+            eval_env,
+            norm_obs=False,
+            norm_reward=False,
+            training=False,
+            gamma=GAMMA,
+        )
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        # load checkpoint if it exists
-        checkpoint_path = get_checkpoint_path()
 
         if checkpoint_path is not None:
             model = PPO.load(
@@ -93,10 +136,17 @@ def main():
                 env=env,
                 device=device,
                 verbose=1,
-                learning_rate=LEARNING_RATE,
+                learning_rate=linear_schedule(LEARNING_RATE),
                 n_steps=N_STEPS,
                 batch_size=BATCH_SIZE,
                 ent_coef=ENT_COEF,
+                target_kl=TARGET_KL,
+                n_epochs=N_EPOCHS,
+                gamma=GAMMA,
+                gae_lambda=GAE_LAMBDA,
+                clip_range=CLIP_RANGE,
+                vf_coef=VF_COEF,
+                max_grad_norm=MAX_GRAD_NORM,
                 tensorboard_log=TENSORBOARD_LOG_DIR,
                 seed=SEED,
             )
@@ -113,6 +163,7 @@ def main():
                         save_path=CHECKPOINT_DIR,
                         name_prefix=MODEL_NAME,
                         verbose=2,
+                        save_vecnormalize=True,
                     ),
                     EvalCallback(
                         eval_env,
@@ -123,7 +174,10 @@ def main():
                         deterministic=True,
                         verbose=2,
                         render=False,
-                        callback_on_new_best=RecordVideoAtBestModelCallback(),
+                        callback_on_new_best=CallbackList([
+                            RecordVideoAtBestModelCallback(),
+                            SaveVecNormalizeAtBestModelCallback(),
+                        ]),
                     ),
                 ],
                 reset_num_timesteps=reset_num_timesteps,

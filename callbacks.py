@@ -1,12 +1,27 @@
+from pathlib import Path
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, VecTransposeImage
 from environment import MarioEnvironment
 from config import (
+    BEST_MODEL_SAVE_DIR,
     FRAME_STACK,
     GAME_NAME,
     STATE_NAME,
     SEED,
 )
+
+
+class SaveVecNormalizeAtBestModelCallback(BaseCallback):
+    def _on_step(self) -> bool:
+        vec_normalize = self.model.get_vec_normalize_env()
+        if vec_normalize is None:
+            return True
+
+        save_path = Path(BEST_MODEL_SAVE_DIR)
+        save_path.mkdir(parents=True, exist_ok=True)
+        vec_normalize.save(save_path / "best_model_vecnormalize.pkl")
+        return True
+
 
 class RecordVideoAtBestModelCallback(BaseCallback):
     # when the new best is found

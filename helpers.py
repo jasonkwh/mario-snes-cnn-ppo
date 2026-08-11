@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import torch
 from config import (
     CHECKPOINT_DIR, MODEL_NAME, BEST_MODEL_SAVE_DIR, 
     RESUME_FROM, RESERVED_CPU_CORES,
@@ -7,6 +8,11 @@ from config import (
 
 def get_n_envs() -> int:
     return max(1, len(os.sched_getaffinity(0)) - RESERVED_CPU_CORES)
+
+def select_training_device() -> torch.device:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Training agent on {str(device).upper()}...")
+    return device
 
 def linear_schedule(initial_value: float):
     def func(progress_remaining: float) -> float:

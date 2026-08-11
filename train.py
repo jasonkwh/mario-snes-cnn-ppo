@@ -1,12 +1,12 @@
 import sys
 import subprocess
-import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, VecTransposeImage, VecNormalize
 from stable_baselines3.common.callbacks import CallbackList, CheckpointCallback, EvalCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 from environment import MarioEnvironment
 from helpers import (
+    select_training_device,
     get_best_model_path,
     get_checkpoint_path,
     get_n_envs,
@@ -120,7 +120,7 @@ def main():
             gamma=GAMMA,
         )
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = select_training_device()
 
         if checkpoint_path is not None:
             model = PPO.load(
@@ -151,8 +151,6 @@ def main():
                 seed=SEED,
             )
             reset_num_timesteps = True
-
-        print(f"Training {GAME_NAME} Agent on {device.upper()}...")
 
         if model.num_timesteps < TOTAL_TIMESTEPS:
             model.learn(

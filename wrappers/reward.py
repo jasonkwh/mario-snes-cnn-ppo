@@ -13,8 +13,8 @@ class RewardWrapper(gym.Wrapper):
         self.prev_state: RewardState | None = None
         self.rules = [
             # order matters
-            FailurePenaltyRule(),
             CompletionRule(),
+            FailurePenaltyRule(),
             ScoreEventRule(),
             ProgressRule(),
         ]

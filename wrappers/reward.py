@@ -5,6 +5,7 @@ class RewardWrapper(gym.Wrapper):
         super().__init__(env)
         self.set_previous_state_values()
         self.has_previous_state = False
+        self.max_x = 0
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -17,7 +18,7 @@ class RewardWrapper(gym.Wrapper):
             self.get_current_time(info),
         )
         self.has_previous_state = "x" in info
-
+        self.max_x = info.get("x", 0)
         return obs, info
 
     def step(self, action):
@@ -44,8 +45,11 @@ class RewardWrapper(gym.Wrapper):
 
         if self.is_lost_life(current_lives):
             reward -= 5.0 # Death penalty
+            terminated = True
         else:
-            reward += self.x_changed(current_x) * 0.05 # Progress reward/penalty
+            if current_x > self.max_x:
+                self.max_x = current_x
+                reward += 0.05 # Progress reward
 
         if self.increase_score(current_score):
             if self.has_collected_coin(current_coins):
@@ -56,8 +60,10 @@ class RewardWrapper(gym.Wrapper):
         if self.times_up(current_timer):
             reward -= 10.0 # Times up penalty
             terminated = True
-        elif self.timer_tick(current_timer):
-            reward -= 0.02 # Timer penalty
+        elif current_timer < 100:
+            reward -= 0.02 # hurry up mario!
+        else:
+            reward -= 0.01 # Timer penalty every step
 
         if self.level_completed(current_level_end_timer):
             reward += 100.0 # Level completion reward
@@ -83,17 +89,11 @@ class RewardWrapper(gym.Wrapper):
     def increase_score(self, current_score):
         return current_score > self.prev_score
 
-    def x_changed(self, current_x):
-        return current_x - self.prev_x
-
     def get_current_time(self, info):
         hundreds = info.get("timer_hundreds", 0)
         tens = info.get("timer_tens", 0)
         ones = info.get("timer_ones", 0)
         return hundreds * 100 + tens * 10 + ones
-
-    def timer_tick(self, current_timer):
-        return current_timer < self.prev_timer
 
     def set_previous_state_values(
         self, 

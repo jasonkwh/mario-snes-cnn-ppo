@@ -7,6 +7,7 @@ from .reward_rules import (
     ProgressRule,
 )
 
+
 class RewardWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
@@ -22,7 +23,7 @@ class RewardWrapper(gym.Wrapper):
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.prev_state = RewardState.from_info(info) if "x" in info else None
-        
+
         for rule in self.rules:
             rule.reset(self.prev_state)
 

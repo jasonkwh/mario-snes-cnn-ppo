@@ -7,10 +7,15 @@ from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 from stable_baselines3.common.monitor import Monitor
 
 from config import (
-    VIDEO_DIR, RECORD_VIDEO_EVERY,
-    FRAME_SKIP, OBSERVATION_SHAPE, VIDEO_RENDER_FPS,
-    MAX_EPISODE_STEPS, MODEL_NAME,
+    VIDEO_DIR,
+    RECORD_VIDEO_EVERY,
+    FRAME_SKIP,
+    OBSERVATION_SHAPE,
+    VIDEO_RENDER_FPS,
+    MAX_EPISODE_STEPS,
+    MODEL_NAME,
 )
+
 
 class MarioEnvironment(gym.Wrapper):
     def __init__(
@@ -51,7 +56,7 @@ class MarioEnvironment(gym.Wrapper):
 
         super().__init__(
             Monitor(
-                env, 
+                env,
                 filename=monitor_filename if monitor_filename else None,
             )
         )
@@ -59,6 +64,6 @@ class MarioEnvironment(gym.Wrapper):
     def reset(self, *, seed=None, options=None):
         if seed is None:
             seed = self._initial_seed
-            
+
         self._initial_seed = None
         return super().reset(seed=seed, options=options)

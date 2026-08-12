@@ -1,8 +1,17 @@
 import sys
 import subprocess
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecFrameStack, VecTransposeImage, VecNormalize
-from stable_baselines3.common.callbacks import CallbackList, CheckpointCallback, EvalCallback
+from stable_baselines3.common.vec_env import (
+    SubprocVecEnv,
+    VecFrameStack,
+    VecTransposeImage,
+    VecNormalize,
+)
+from stable_baselines3.common.callbacks import (
+    CallbackList,
+    CheckpointCallback,
+    EvalCallback,
+)
 from stable_baselines3.common.evaluation import evaluate_policy
 from environment import MarioEnvironment
 from helpers import (
@@ -21,12 +30,35 @@ from callbacks import (
 )
 
 from config import (
-    GAME_NAME, STATE_NAME, MODEL_NAME, BEST_MODEL_SAVE_DIR, TENSORBOARD_LOG_DIR,
-    CHECKPOINT_DIR, MONITOR_FILENAME, MONITOR_EVALUATION_FILENAME, LEARNING_RATE, N_STEPS, 
-    BATCH_SIZE, ENT_COEF, FRAME_STACK, TOTAL_TIMESTEPS, EVAL_EVERY, N_EVAL_EPISODES, 
-    CHECKPOINT_EVERY, SEED, N_EVAL_EPISODES_FINAL, TARGET_KL, N_EPOCHS, GAMMA, 
-    GAE_LAMBDA, CLIP_RANGE, VF_COEF, MAX_GRAD_NORM, CLIP_REWARD
+    GAME_NAME,
+    STATE_NAME,
+    MODEL_NAME,
+    BEST_MODEL_SAVE_DIR,
+    TENSORBOARD_LOG_DIR,
+    CHECKPOINT_DIR,
+    MONITOR_FILENAME,
+    MONITOR_EVALUATION_FILENAME,
+    LEARNING_RATE,
+    N_STEPS,
+    BATCH_SIZE,
+    ENT_COEF,
+    FRAME_STACK,
+    TOTAL_TIMESTEPS,
+    EVAL_EVERY,
+    N_EVAL_EPISODES,
+    CHECKPOINT_EVERY,
+    SEED,
+    N_EVAL_EPISODES_FINAL,
+    TARGET_KL,
+    N_EPOCHS,
+    GAMMA,
+    GAE_LAMBDA,
+    CLIP_RANGE,
+    VF_COEF,
+    MAX_GRAD_NORM,
+    CLIP_REWARD,
 )
+
 
 def final_evaluation(model, eval_env):
     mean_reward, std_reward = evaluate_policy(
@@ -37,6 +69,7 @@ def final_evaluation(model, eval_env):
     )
     print(f"Final evaluation: {mean_reward:.2f} +/- {std_reward:.2f}")
 
+
 def get_model_to_save(model, device):
     best_model_path = get_best_model_path()
 
@@ -45,8 +78,11 @@ def get_model_to_save(model, device):
         print("Using the best model selected during training for final evaluation.")
         return best_model
     else:
-        print("No evaluated best model was created. Using the last trained model for final evaluation.")
+        print(
+            "No evaluated best model was created. Using the last trained model for final evaluation."
+        )
         return model
+
 
 def main():
     env = None
@@ -62,15 +98,18 @@ def main():
 
         print(result.stdout)
 
-        env = SubprocVecEnv([
-            lambda rank=rank: MarioEnvironment(
-                GAME_NAME,
-                STATE_NAME,
-                monitor_filename=MONITOR_FILENAME.replace(".csv", f"-{rank}.csv"),
-                seed=SEED + rank,
-            )
-            for rank in range(get_n_envs())
-        ], start_method="spawn")
+        env = SubprocVecEnv(
+            [
+                lambda rank=rank: MarioEnvironment(
+                    GAME_NAME,
+                    STATE_NAME,
+                    monitor_filename=MONITOR_FILENAME.replace(".csv", f"-{rank}.csv"),
+                    seed=SEED + rank,
+                )
+                for rank in range(get_n_envs())
+            ],
+            start_method="spawn",
+        )
         env = VecFrameStack(env, n_stack=FRAME_STACK, channels_order="last")
         env = VecTransposeImage(env)
 
@@ -102,14 +141,17 @@ def main():
                 gamma=GAMMA,
             )
 
-        eval_env = SubprocVecEnv([
-            lambda: MarioEnvironment(
-                GAME_NAME,
-                STATE_NAME,
-                monitor_filename=MONITOR_EVALUATION_FILENAME,
-                seed=SEED + 10_000,
-            )
-        ], start_method="spawn")
+        eval_env = SubprocVecEnv(
+            [
+                lambda: MarioEnvironment(
+                    GAME_NAME,
+                    STATE_NAME,
+                    monitor_filename=MONITOR_EVALUATION_FILENAME,
+                    seed=SEED + 10_000,
+                )
+            ],
+            start_method="spawn",
+        )
         eval_env = VecFrameStack(eval_env, n_stack=FRAME_STACK, channels_order="last")
         eval_env = VecTransposeImage(eval_env)
         eval_env = VecNormalize(
@@ -172,16 +214,20 @@ def main():
                         deterministic=True,
                         verbose=2,
                         render=False,
-                        callback_on_new_best=CallbackList([
-                            RecordVideoAtBestModelCallback(),
-                            SaveVecNormalizeAtBestModelCallback(),
-                        ]),
+                        callback_on_new_best=CallbackList(
+                            [
+                                RecordVideoAtBestModelCallback(),
+                                SaveVecNormalizeAtBestModelCallback(),
+                            ]
+                        ),
                     ),
                 ],
                 reset_num_timesteps=reset_num_timesteps,
             )
         else:
-            print(f"Model has already reached {TOTAL_TIMESTEPS} timesteps. Skipping training.")
+            print(
+                f"Model has already reached {TOTAL_TIMESTEPS} timesteps. Skipping training."
+            )
 
         # Evaluate and save the same policy: the best checkpoint when available.
         final_model = get_model_to_save(model, device)
@@ -195,6 +241,7 @@ def main():
             env.close()
         if eval_env is not None:
             eval_env.close()
+
 
 if __name__ == "__main__":
     setup_game()

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from .reward_types import RewardState
 
+
 class RewardRule(ABC):
     def reset(self, prev_state: RewardState | None = None) -> None:
         """Reset the rule state."""
@@ -14,6 +15,7 @@ class RewardRule(ABC):
     ) -> tuple[float, bool]:
         """Return (reward_delta, terminated)."""
 
+
 class CompletionRule(RewardRule):
     def apply(
         self,
@@ -23,6 +25,7 @@ class CompletionRule(RewardRule):
         if prev_state.is_level_completed(cur_state):
             return 100.0, True
         return 0.0, False
+
 
 class FailurePenaltyRule(RewardRule):
     def apply(
@@ -36,6 +39,7 @@ class FailurePenaltyRule(RewardRule):
             return -10.0, True
         return 0.0, False
 
+
 class ScoreEventRule(RewardRule):
     def apply(
         self,
@@ -47,6 +51,7 @@ class ScoreEventRule(RewardRule):
                 return 0.2, False
             return 0.05, False
         return 0.0, False
+
 
 class ProgressRule(RewardRule):
     def __init__(self):
@@ -67,10 +72,10 @@ class ProgressRule(RewardRule):
             reward_delta -= 0.02
         else:
             reward_delta -= 0.01
-        
+
         # progress reward, if x increased
         if cur_state.x > self.max_x:
             self.max_x = cur_state.x
             reward_delta += 0.05
-        
+
         return reward_delta, False

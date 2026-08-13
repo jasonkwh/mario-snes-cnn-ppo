@@ -8,7 +8,6 @@ from stable_baselines3.common.monitor import Monitor
 
 from config import (
     VIDEO_DIR,
-    RECORD_VIDEO_EVERY,
     FRAME_SKIP,
     OBSERVATION_SHAPE,
     VIDEO_RENDER_FPS,
@@ -49,7 +48,7 @@ class MarioEnvironment(gym.Wrapper):
             env = gym.wrappers.RecordVideo(
                 env,
                 video_folder=VIDEO_DIR,
-                episode_trigger=lambda episode_id: episode_id % RECORD_VIDEO_EVERY == 0,
+                episode_trigger=lambda _: True,
                 fps=VIDEO_RENDER_FPS,
                 name_prefix=f"{MODEL_NAME}-{seed}-{uuid4().hex[:12]}",
             )

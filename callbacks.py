@@ -28,7 +28,6 @@ class SaveVecNormalizeAtBestModelCallback(BaseCallback):
 
 
 class RecordVideoAtBestModelCallback(BaseCallback):
-    # when the new best is found
     def _on_step(self) -> bool:
         video_env = SubprocVecEnv(
             [

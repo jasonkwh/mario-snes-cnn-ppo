@@ -38,8 +38,8 @@ class MarioEnvironment(gym.Wrapper):
         env = ActionWrapper(env)
         env = RewardWrapper(env)
         env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
-        env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
         env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
+        env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)
         env = gym.wrappers.TimeLimit(
             env,
             max_episode_steps=MAX_EPISODE_STEPS,

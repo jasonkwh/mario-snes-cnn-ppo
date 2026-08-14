@@ -25,8 +25,8 @@ class RewardWrapper(gym.Wrapper):
             key: 0.0
             for rule in self.rules
             for key in (
-                f"reward/rules/{rule.get_name()}",
-                f"termination/{rule.get_name()}",
+                f"reward/rules/{rule.name}",
+                f"termination/{rule.name}",
             )
         }
 
@@ -54,13 +54,17 @@ class RewardWrapper(gym.Wrapper):
         else:
             for rule in self.rules:
                 reward_delta, rule_terminated = rule.apply(self.prev_state, cur_state)
-                metrics[f"reward/rules/{rule.get_name()}"] = reward_delta
+                metrics[f"reward/rules/{rule.name}"] = reward_delta
                 reward += reward_delta
 
                 if rule_terminated:
                     terminated = True
-                    metrics[f"termination/{rule.get_name()}"] = 1.0
+                    metrics[f"termination/{rule.name}"] = 1.0
                     break
+
+        # get metrics from all rules, in case if terminated
+        for rule in self.rules:
+            metrics.update(rule.get_metrics())
 
         self.prev_state = cur_state
         info["reward/total"] = reward

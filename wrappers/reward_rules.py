@@ -15,9 +15,12 @@ class RewardRule(ABC):
     ) -> tuple[float, bool]:
         """Return (reward_delta, terminated)."""
 
-    @abstractmethod
-    def get_name(self) -> str:
-        """Return the name of the rule."""
+    @property
+    def name(self) -> str:
+        return type(self).__name__.removesuffix("Rule")
+
+    def get_metrics(self) -> dict[str, float]:
+        return {}
 
 
 class CompletionRule(RewardRule):
@@ -30,9 +33,6 @@ class CompletionRule(RewardRule):
             return 100.0, True
         return 0.0, False
 
-    def get_name(self) -> str:
-        return "completion"
-
 
 class TimeUpPenaltyRule(RewardRule):
     def apply(
@@ -44,9 +44,6 @@ class TimeUpPenaltyRule(RewardRule):
             return -10.0, True
         return 0.0, False
 
-    def get_name(self) -> str:
-        return "time_up"
-
 
 class LifeLostPenaltyRule(RewardRule):
     def apply(
@@ -57,9 +54,6 @@ class LifeLostPenaltyRule(RewardRule):
         if prev_state.is_lost_life(cur_state):
             return -5.0, True
         return 0.0, False
-
-    def get_name(self) -> str:
-        return "lost_life"
 
 
 class ScoreEventRule(RewardRule):
@@ -73,9 +67,6 @@ class ScoreEventRule(RewardRule):
                 return 0.2, False
             return 0.05, False
         return 0.0, False
-
-    def get_name(self) -> str:
-        return "score_event"
 
 
 class ProgressRule(RewardRule):
@@ -105,5 +96,7 @@ class ProgressRule(RewardRule):
 
         return reward_delta, False
 
-    def get_name(self) -> str:
-        return "progress"
+    def get_metrics(self) -> dict[str, float]:
+        return {
+            "max_x": float(self.max_x),
+        }

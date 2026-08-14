@@ -15,6 +15,10 @@ class RewardRule(ABC):
     ) -> tuple[float, bool]:
         """Return (reward_delta, terminated)."""
 
+    @abstractmethod
+    def get_name(self) -> str:
+        """Return the name of the rule."""
+
 
 class CompletionRule(RewardRule):
     def apply(
@@ -26,8 +30,25 @@ class CompletionRule(RewardRule):
             return 100.0, True
         return 0.0, False
 
+    def get_name(self) -> str:
+        return "completion"
 
-class FailurePenaltyRule(RewardRule):
+
+class TimeUpPenaltyRule(RewardRule):
+    def apply(
+        self,
+        prev_state: RewardState,
+        cur_state: RewardState,
+    ) -> tuple[float, bool]:
+        if prev_state.is_times_up(cur_state):
+            return -10.0, True
+        return 0.0, False
+
+    def get_name(self) -> str:
+        return "time_up"
+
+
+class LifeLostPenaltyRule(RewardRule):
     def apply(
         self,
         prev_state: RewardState,
@@ -35,9 +56,10 @@ class FailurePenaltyRule(RewardRule):
     ) -> tuple[float, bool]:
         if prev_state.is_lost_life(cur_state):
             return -5.0, True
-        if prev_state.is_times_up(cur_state):
-            return -10.0, True
         return 0.0, False
+
+    def get_name(self) -> str:
+        return "lost_life"
 
 
 class ScoreEventRule(RewardRule):
@@ -51,6 +73,9 @@ class ScoreEventRule(RewardRule):
                 return 0.2, False
             return 0.05, False
         return 0.0, False
+
+    def get_name(self) -> str:
+        return "score_event"
 
 
 class ProgressRule(RewardRule):
@@ -79,3 +104,6 @@ class ProgressRule(RewardRule):
             reward_delta += 0.05
 
         return reward_delta, False
+
+    def get_name(self) -> str:
+        return "progress"

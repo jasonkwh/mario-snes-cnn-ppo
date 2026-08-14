@@ -25,8 +25,9 @@ from helpers import (
 )
 from setup import setup_game
 from callbacks import (
-    RecordVideoAtBestModelCallback,
-    SaveVecNormalizeAtBestModelCallback,
+    TensorboardLogExtensionCallback,
+    RecordVideoCallback,
+    SaveVecNormalizeCallback,
 )
 
 from config import (
@@ -198,6 +199,7 @@ def main():
             model.learn(
                 total_timesteps=TOTAL_TIMESTEPS - model.num_timesteps,
                 callback=[
+                    TensorboardLogExtensionCallback(),
                     CheckpointCallback(
                         save_freq=max(CHECKPOINT_EVERY // get_n_envs(), 1),
                         save_path=CHECKPOINT_DIR,
@@ -216,8 +218,8 @@ def main():
                         render=False,
                         callback_on_new_best=CallbackList(
                             [
-                                RecordVideoAtBestModelCallback(),
-                                SaveVecNormalizeAtBestModelCallback(),
+                                RecordVideoCallback(),
+                                SaveVecNormalizeCallback(),
                             ]
                         ),
                     ),

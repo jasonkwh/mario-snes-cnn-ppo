@@ -15,19 +15,49 @@ from config import (
 )
 
 
-class SaveVecNormalizeAtBestModelCallback(BaseCallback):
+class TensorboardLogExtensionCallback(BaseCallback):
+    def _on_step(self) -> bool:
+        for env_index, info in enumerate(self.locals.get("infos", [])):
+            for key, value in info.items():
+                if key in ("powerup", "item"):
+                    self.logger.record(
+                        f"env_{env_index}/state/{key}",
+                        int(value),
+                    )
+
+                elif key in ("x", "y", "timer"):
+                    self.logger.record(f"env_{env_index}/state/{key}", float(value))
+                    self.logger.record_mean(f"state/{key}", float(value))
+
+                elif key.startswith("reward/") or key.startswith("termination/"):
+                    self.logger.record(f"env_{env_index}/{key}", float(value))
+                    self.logger.record_mean(key, float(value))
+
+        return True
+
+
+class SaveVecNormalizeCallback(BaseCallback):
+    def __init__(
+        self,
+        save_dir: Path | str = Path(BEST_MODEL_SAVE_DIR),
+        name_prefix: str = "best_model",
+    ):
+        super().__init__()
+        if isinstance(save_dir, str):
+            save_dir = Path(save_dir)
+        save_dir.mkdir(parents=True, exist_ok=True)
+        self.save_path = save_dir / f"{name_prefix}_vecnormalize.pkl"
+
     def _on_step(self) -> bool:
         vec_normalize = self.model.get_vec_normalize_env()
         if vec_normalize is None:
             return True
 
-        save_path = Path(BEST_MODEL_SAVE_DIR)
-        save_path.mkdir(parents=True, exist_ok=True)
-        vec_normalize.save(save_path / "best_model_vecnormalize.pkl")
+        vec_normalize.save(self.save_path)
         return True
 
 
-class RecordVideoAtBestModelCallback(BaseCallback):
+class RecordVideoCallback(BaseCallback):
     def _on_step(self) -> bool:
         video_env = SubprocVecEnv(
             [

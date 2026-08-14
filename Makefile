@@ -1,4 +1,4 @@
-.PHONY: default install setup train clean
+.PHONY: default install setup train clean tensorboard
 
 default: train
 
@@ -14,3 +14,6 @@ train:
 
 clean:
 	rm -rf mario_checkpoints/ mario_best_model/ mario_videos/ mario_logs/
+
+tensorboard:
+	tensorboard --logdir mario_logs/tensorboard/

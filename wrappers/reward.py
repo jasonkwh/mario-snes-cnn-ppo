@@ -16,11 +16,13 @@ class RewardWrapper(gym.Wrapper):
         self.prev_state: RewardState | None = None
         self.rules = [
             # order matters
+            # 1. termination rules
             CompletionRule(),
             TimeUpPenaltyRule(),
             LifeLostPenaltyRule(),
-            ScoreEventRule(),
+            # 2. reward shaping rules
             ProgressRule(),
+            ScoreEventRule(),
             PowerUpRule(),
         ]
         self.metric_defaults = {

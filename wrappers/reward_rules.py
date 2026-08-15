@@ -70,18 +70,31 @@ class ScoreEventRule(RewardRule):
 
 
 class PowerUpRule(RewardRule):
+    POWERUP_REWARDS = {
+        1: 0.1,  # Big
+        2: 0.2,  # Cape
+        3: 0.2,  # Fire
+    }
+
     def apply(
         self,
         prev_state: RewardState,
         cur_state: RewardState,
     ) -> tuple[float, bool]:
-        if prev_state.becomes_big_mario(cur_state):
-            return cur_state.powerup / 10, False
-        if prev_state.becomes_small_mario(cur_state):
-            if prev_state.is_lost_life(cur_state):
-                return 0.0, False
-            return -0.1, False
-        return 0.0, False
+        reward_delta = 0.0
+
+        # traditional power ups
+        if prev_state.gains_powerup(cur_state):
+            reward_delta += self.POWERUP_REWARDS[cur_state.powerup]
+        if prev_state.loses_powerup(cur_state):
+            if not prev_state.is_lost_life(cur_state):
+                reward_delta -= 0.1
+
+        # star power
+        if prev_state.gains_star(cur_state):
+            reward_delta += 0.3
+
+        return reward_delta, False
 
 
 class ProgressRule(RewardRule):

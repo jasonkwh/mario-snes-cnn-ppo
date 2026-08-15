@@ -69,6 +69,21 @@ class ScoreEventRule(RewardRule):
         return 0.0, False
 
 
+class PowerUpRule(RewardRule):
+    def apply(
+        self,
+        prev_state: RewardState,
+        cur_state: RewardState,
+    ) -> tuple[float, bool]:
+        if prev_state.becomes_big_mario(cur_state):
+            return cur_state.powerup / 10, False
+        if prev_state.becomes_small_mario(cur_state):
+            if prev_state.is_lost_life(cur_state):
+                return 0.0, False
+            return -0.1, False
+        return 0.0, False
+
+
 class ProgressRule(RewardRule):
     def __init__(self):
         self.max_x = 0

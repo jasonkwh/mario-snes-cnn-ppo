@@ -9,6 +9,7 @@ class RewardState:
     x: int
     level_end_timer: int
     timer: int
+    powerup: int
 
     @classmethod
     def from_info(cls, info: dict) -> "RewardState":
@@ -19,6 +20,7 @@ class RewardState:
             x=info.get("x", 0),
             level_end_timer=info.get("level_end_timer", 0),
             timer=cls._get_current_time(info),
+            powerup=info.get("powerup", 0),
         )
 
     @staticmethod
@@ -42,3 +44,9 @@ class RewardState:
 
     def has_increased_score(self, current: "RewardState") -> bool:
         return current.score > self.score
+
+    def becomes_big_mario(self, current: "RewardState") -> bool:
+        return current.powerup != 0 and self.powerup == 0
+
+    def becomes_small_mario(self, current: "RewardState") -> bool:
+        return current.powerup == 0 and self.powerup != 0

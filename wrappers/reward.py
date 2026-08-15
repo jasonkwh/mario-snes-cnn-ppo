@@ -6,6 +6,7 @@ from .reward_rules import (
     LifeLostPenaltyRule,
     ScoreEventRule,
     ProgressRule,
+    PowerUpRule,
 )
 
 
@@ -20,6 +21,7 @@ class RewardWrapper(gym.Wrapper):
             LifeLostPenaltyRule(),
             ScoreEventRule(),
             ProgressRule(),
+            PowerUpRule(),
         ]
         self.metric_defaults = {
             key: 0.0

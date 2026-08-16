@@ -25,7 +25,7 @@ class TensorboardLogExtensionCallback(BaseCallback):
                         int(value),
                     )
 
-                elif key in ("x", "y", "timer", "max_x"):
+                elif key in ("x", "y", "timer", "max_progress"):
                     self.logger.record(f"env_{env_index}/state/{key}", float(value))
                     self.logger.record_mean(f"state/{key}", float(value))
 

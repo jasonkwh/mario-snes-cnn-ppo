@@ -97,34 +97,35 @@ class PowerUpRule(RewardRule):
         return reward_delta, False
 
 
+class TimerPenaltyRule(RewardRule):
+    def apply(
+        self,
+        prev_state: RewardState,
+        cur_state: RewardState,
+    ) -> tuple[float, bool]:
+        if cur_state.timer < 100:
+            return -0.02, False
+        return -0.01, False
+
+
 class ProgressRule(RewardRule):
     def __init__(self):
-        self.max_x = 0
+        self.max_progress = 0
 
     def reset(self, prev_state: RewardState | None = None) -> None:
-        self.max_x = prev_state.x if prev_state is not None else 0
+        self.max_progress = prev_state.x if prev_state is not None else 0
 
     def apply(
         self,
         prev_state: RewardState,
         cur_state: RewardState,
     ) -> tuple[float, bool]:
-        reward_delta = 0.0
-
-        # time based penalty, every step
-        if cur_state.timer < 100:
-            reward_delta -= 0.02
-        else:
-            reward_delta -= 0.01
-
-        # progress reward, if x increased
-        if cur_state.x > self.max_x:
-            self.max_x = cur_state.x
-            reward_delta += 0.05
-
-        return reward_delta, False
+        if cur_state.x > self.max_progress:
+            self.max_progress = cur_state.x
+            return 0.05, False
+        return 0.0, False
 
     def get_metrics(self) -> dict[str, float]:
         return {
-            "max_x": float(self.max_x),
+            "max_progress": float(self.max_progress),
         }

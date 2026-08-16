@@ -53,7 +53,9 @@ class LifeLostPenaltyRule(RewardRule):
         cur_state: RewardState,
     ) -> tuple[float, bool]:
         if prev_state.is_lost_life(cur_state):
-            return -5.0, True
+            if prev_state.is_dead(cur_state):
+                return -20.0, True
+            return -5.0, False
         return 0.0, False
 
 
@@ -105,8 +107,8 @@ class TimerPenaltyRule(RewardRule):
         cur_state: RewardState,
     ) -> tuple[float, bool]:
         if cur_state.timer < 100:
-            return -0.02, False
-        return -0.01, False
+            return -0.0005, False
+        return -0.00025, False
 
 
 class ProgressRule(RewardRule):
@@ -115,7 +117,7 @@ class ProgressRule(RewardRule):
         estimator: ProgressEstimator,
     ):
         self.estimator = estimator
-        self.max_progress = 0
+        self.max_progress = 0.0
 
     def reset(self, prev_state: RewardState | None = None) -> None:
         self.max_progress = self.estimator.estimate(prev_state)
@@ -126,10 +128,11 @@ class ProgressRule(RewardRule):
         cur_state: RewardState,
     ) -> tuple[float, bool]:
         cur_progress = self.estimator.estimate(cur_state)
+        progress_delta = max(0.0, cur_progress - self.max_progress)
 
-        if cur_progress > self.max_progress:
+        if progress_delta > 0.0:
             self.max_progress = cur_progress
-            return 0.05, False
+            return 0.005 * progress_delta, False
 
         return 0.0, False
 

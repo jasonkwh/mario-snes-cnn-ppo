@@ -41,6 +41,9 @@ class RewardState:
     def is_lost_life(self, current: "RewardState") -> bool:
         return current.lives < self.lives
 
+    def is_dead(self, current: "RewardState") -> bool:
+        return self.lives == 0 and current.lives == -1
+
     def has_collected_coin(self, current: "RewardState") -> bool:
         return current.coins > self.coins
 

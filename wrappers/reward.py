@@ -9,6 +9,9 @@ from .reward_rules import (
     PowerUpRule,
     TimerPenaltyRule,
 )
+from .progress_estimators import (
+    XProgressEstimator,
+)
 
 
 class RewardWrapper(gym.Wrapper):
@@ -23,7 +26,7 @@ class RewardWrapper(gym.Wrapper):
             LifeLostPenaltyRule(),
             # 2. reward shaping rules
             TimerPenaltyRule(),
-            ProgressRule(),
+            ProgressRule(XProgressEstimator()),
             ScoreEventRule(),
             PowerUpRule(),
         ]

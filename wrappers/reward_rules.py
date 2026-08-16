@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from .reward_types import RewardState
+from .progress_estimators import ProgressEstimator, XProgressEstimator
 
 
 class RewardRule(ABC):
@@ -109,20 +110,27 @@ class TimerPenaltyRule(RewardRule):
 
 
 class ProgressRule(RewardRule):
-    def __init__(self):
+    def __init__(
+        self,
+        estimator: ProgressEstimator,
+    ):
+        self.estimator = estimator
         self.max_progress = 0
 
     def reset(self, prev_state: RewardState | None = None) -> None:
-        self.max_progress = prev_state.x if prev_state is not None else 0
+        self.max_progress = self.estimator.estimate(prev_state)
 
     def apply(
         self,
         prev_state: RewardState,
         cur_state: RewardState,
     ) -> tuple[float, bool]:
-        if cur_state.x > self.max_progress:
-            self.max_progress = cur_state.x
+        cur_progress = self.estimator.estimate(cur_state)
+
+        if cur_progress > self.max_progress:
+            self.max_progress = cur_progress
             return 0.05, False
+
         return 0.0, False
 
     def get_metrics(self) -> dict[str, float]:

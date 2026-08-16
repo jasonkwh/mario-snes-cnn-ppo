@@ -14,6 +14,10 @@ class ProgressEstimator(ABC):
         pass
 
 
+def create_progress_estimator(state_name: str) -> ProgressEstimator:
+    return XProgressEstimator()
+
+
 class XProgressEstimator(ProgressEstimator):
     def _estimate(self, state: RewardState) -> float:
         return float(state.x)

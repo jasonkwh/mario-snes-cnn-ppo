@@ -35,7 +35,7 @@ class MarioEnvironment(gym.Wrapper):
         )
 
         env = ActionWrapper(env)
-        env = RewardWrapper(env)
+        env = RewardWrapper(env, state_name)
         env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
         env = gym.wrappers.GrayscaleObservation(env, keep_dim=True)
         env = gym.wrappers.ResizeObservation(env, shape=OBSERVATION_SHAPE)

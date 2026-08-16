@@ -9,13 +9,11 @@ from .reward_rules import (
     PowerUpRule,
     TimerPenaltyRule,
 )
-from .progress_estimators import (
-    XProgressEstimator,
-)
+from .progress_estimators import create_progress_estimator
 
 
 class RewardWrapper(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env, state_name: str):
         super().__init__(env)
         self.prev_state: RewardState | None = None
         self.rules = [
@@ -26,7 +24,7 @@ class RewardWrapper(gym.Wrapper):
             LifeLostPenaltyRule(),
             # 2. reward shaping rules
             TimerPenaltyRule(),
-            ProgressRule(XProgressEstimator()),
+            ProgressRule(create_progress_estimator(state_name)),
             ScoreEventRule(),
             PowerUpRule(),
         ]
